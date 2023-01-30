@@ -15,12 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static carrot.dev.customrecipes.Main.chatColor;
-
 public class ItemBuilder {
     protected ItemStack is;
     protected ItemMeta im;
     protected LeatherArmorMeta leather;
+
+    private static String chatColor(String s){
+        return s.replace("&", "§");
+    }
 
     public ItemBuilder() {
         this(Material.AIR);
