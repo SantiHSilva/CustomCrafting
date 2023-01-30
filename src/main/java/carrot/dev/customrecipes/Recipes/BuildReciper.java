@@ -18,7 +18,7 @@ public class BuildReciper {
     protected ShapedRecipe recipe;
     protected boolean haveAmount;
     public static HashMap<ItemStack, HashMap<ItemStack, List<Integer>>> ingredientsWithAmount = new HashMap<>();
-    public static List<ItemStack> ingredientesConMasCantidad = new ArrayList<>();
+    public static List<ItemStack> listaDeIngredientesConCantidad = new ArrayList<>();
 
     //Temp hashmap
     protected HashMap<ItemStack, List<Integer>> materialesParaIngrediente;
@@ -31,7 +31,7 @@ public class BuildReciper {
 
         if(this.haveAmount){
             this.materialesParaIngrediente = new HashMap<>();
-            ingredientesConMasCantidad.add(item);
+            listaDeIngredientesConCantidad.add(item);
         }
 
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
@@ -46,7 +46,7 @@ public class BuildReciper {
 
         if(this.haveAmount){
             this.materialesParaIngrediente = new HashMap<>();
-            ingredientesConMasCantidad.add(item);
+            listaDeIngredientesConCantidad.add(item);
         }
 
         if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot
@@ -63,7 +63,7 @@ public class BuildReciper {
 
         if(this.haveAmount){
             this.materialesParaIngrediente = new HashMap<>();
-            ingredientesConMasCantidad.add(new ItemStack(material, amount));
+            listaDeIngredientesConCantidad.add(new ItemStack(material, amount));
         }
 
         if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot

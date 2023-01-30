@@ -1,6 +1,5 @@
 package carrot.dev.customrecipes;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import static carrot.dev.customrecipes.Main.broadcast;
 import static carrot.dev.customrecipes.Recipes.BuildReciper.ingredientsWithAmount;
+import static carrot.dev.customrecipes.Recipes.BuildReciper.listaDeIngredientesConCantidad;
 
 import java.util.*;
 
@@ -20,95 +20,28 @@ public class CraftingEvent implements Listener {
     private static void removeCustomRecipeItems(CraftItemEvent e){
         if(e.getInventory().getResult() == null) return;
         boolean isShiftClick = e.isShiftClick();
-        if(isShiftClick){
-            e.getWhoClicked().sendMessage("No puedes hacer shift click");
-            e.setCancelled(true);
-        }
+        if(isShiftClick)
+            removeCustomItemWithShiftClick(e.getInventory(), (Player) e.getWhoClicked());
         else
             removeCustomItemsNoShiftClick(e.getInventory());
     }
-
-    /*
-    private static boolean isAvailableToAdd(Player target, Material material){
-        int total = 0;
-        for(ItemStack item : target.getInventory().getContents()){
-            if(item != null && item.getType() == material)
-                total += item.getAmount();
-        }
-        if(total == 0) total -= 1;
-        return total % 64 != 0;
-    }
-
-     */
-
-    /*
-
-    Not working
-    private static int getAmountOfAdd(Player target, ItemStack item) {
-        for(int i = 0; i < target.getInventory().getContents().length; i++){
-            ItemStack itemStack = target.getInventory().getContents()[i];
-            if(itemStack != null && itemStack.getType() == item.getType() && itemStack.getAmount() != 64){
-                return 64 - itemStack.getAmount();
-            }
-        }
-    }
-
-     */
 
     public static List<ItemStack> cacheItems(CraftingInventory inv){
         return new ArrayList<>(Arrays.asList(inv.getMatrix()));
     }
 
-    /*
-    private static void removeCustomItemsWithShiftClick(CraftingInventory inv, Player target){
+    private static void removeCustomItemWithShiftClick(CraftingInventory inv, Player target){
         ItemStack result = inv.getResult();
-        if(result != null && !isAvailableToAdd(target, result.getType())) return;
-        if(resultItemsInHashMap().contains(result)){
-            broadcast("removing items with shift click");
-            List<ItemStack> items = cacheItems(inv);
-            int[] invMatrixCopy = new int[inv.getMatrix().length];
-            for(int i = 0; i < invMatrixCopy.length; i++) {
-                ItemStack copy = items.get(i);
-                if(copy == null) continue;
-                broadcast("Item: " + copy.getType() + " Amount: " + copy.getAmount());
-                ItemStack item = getItemOfIngredient(result, copy, i);
-                if(item == null) continue;
-                broadcast("Item to ingredient: " + item.getType() + " Amount: " + item.getAmount());
-
-                // Cuantos puedo comprar
-                int necesario = item.getAmount();
-                broadcast("Necesario: " + necesario);
-                int cuantosComprar = (int) Math.floor((double) copy.getAmount() / item.getAmount());
-                broadcast("Cuantos puedo comprar: " + cuantosComprar);
-                int espacioDisponible = getAmountOfAdd(target, result);
-                broadcast("Espacio para añadir: " + getAmountOfAdd(target, result));
-
-                // Caso de que no tenga espacio para añadir
-                if(espacioDisponible < cuantosComprar){ // Si el espacio es menor que el resultado
-                    if(espacioDisponible == 0) return;
-                    broadcast("Espacio menor que el resultado");
-                    cuantosComprar -= espacioDisponible;
-                    broadcast("Cuantos comprar: " + cuantosComprar);
-                } else broadcast("Espacio mayor que el resultado");
-
-                // Calculo de items a remover
-                int remove = cuantosComprar * necesario;
-                broadcast("Items a remover: " + remove);
-
-                // Remover del inv de crafting
-                if (remove <= 0)
-                    inv.setItem(i, null);
-                else
-                    inv.getMatrix()[i].setAmount(remove);
-            }
+        if(result == null) return;
+        if(isResultItemInHashMap(result)){
+            target.sendMessage("No puedes hacer shift click");
+            return;
         }
     }
 
-     */
-
     private static void removeCustomItemsNoShiftClick(CraftingInventory inv){
         ItemStack result = inv.getResult();
-        if(resultItemsInHashMap().contains(result)){
+        if(isResultItemInHashMap(result)){
             List<ItemStack> items = cacheItems(inv);
             int[] invMatrixCopy = new int[inv.getMatrix().length];
             for(int i = 0; i < invMatrixCopy.length; i++) {
@@ -134,9 +67,8 @@ public class CraftingEvent implements Listener {
         checkCrafts(e.getInventory());
     }
 
-    private static List<ItemStack> resultItemsInHashMap(){
-        Set<Map.Entry<ItemStack, HashMap<ItemStack, List<Integer>>>> entry = ingredientsWithAmount.entrySet();
-        return new ArrayList<>(entry.stream().map(Map.Entry::getKey).toList());
+    private static boolean isResultItemInHashMap(ItemStack result){
+        return listaDeIngredientesConCantidad.contains(result);
     }
 
     private static ItemStack getItemOfIngredient(ItemStack result, ItemStack ingredient, int slot){
@@ -172,7 +104,7 @@ public class CraftingEvent implements Listener {
         //broadcast("result: " + result);
         //broadcast("is in hashmap: " + resultItemsInHashMap().contains(result));
         //broadcast("--------------------");
-        if(resultItemsInHashMap().contains(result)){
+        if(isResultItemInHashMap(result)){
             inv.setResult(null);
             for(int i = 0; i < inv.getMatrix().length; i++){
                 //broadcast("slot: " + i);
