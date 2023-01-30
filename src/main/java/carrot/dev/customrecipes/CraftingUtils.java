@@ -12,7 +12,7 @@ import static carrot.dev.customrecipes.Recipes.BuildReciper.listaDeIngredientesC
 
 public class CraftingUtils {
 
-    private final static boolean debug = false;
+    private final static boolean debug = true;
 
     public static void broadcast(String s){
         if(!debug) return;
@@ -68,7 +68,8 @@ public class CraftingUtils {
             broadcast("Item to ingredient: " + item.getType() + " Amount: " + item.getAmount());
             int costeDeCrafteo = item.getAmount();
             broadcast("Coste de crafteo: " + costeDeCrafteo);
-            cuantosPuedoCraftear = (int) Math.floor( (double) copy.getAmount() / item.getAmount() );
+            // Cantidad de items que puedo craftear, multiplicado por la cantidad que da el resultado
+            cuantosPuedoCraftear = (int) Math.floor( (double) copy.getAmount() / item.getAmount() ) * result.getAmount();
             broadcast("Cuantos puedo craftear: " + cuantosPuedoCraftear);
             int cuantosPuedoAgregar = getAmountForAddItem(target, result);
             broadcast("Cuantos puedo agregar: " + cuantosPuedoAgregar);

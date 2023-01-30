@@ -48,7 +48,7 @@ public class registerRecipes {
     }
 
     private static void registerAnother(){
-        new BuildReciper("cursed2", diamondCustom2(), 1, true)
+        new BuildReciper("cursed2", diamondCustom2(), 2, true)
                 .setShape(
                         "DDD",
                         "DDD",
