@@ -1,0 +1,6 @@
+name: Customrecipes
+version: '${project.version}'
+main: carrot.dev.customrecipes.Main
+api-version: 1.17
+authors: [ Carrotw ]
+description: Create Custom Recipes with amount
