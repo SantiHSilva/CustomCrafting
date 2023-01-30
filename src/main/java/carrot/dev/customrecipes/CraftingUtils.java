@@ -49,6 +49,42 @@ public class CraftingUtils {
         }
     }
 
+    // function to find minimum value in an unsorted
+    // list in Java using Collection
+    public static Integer findMin(List<Integer> list)
+    {
+
+        // check list is empty or not
+        if (list == null || list.size() == 0) {
+            return Integer.MAX_VALUE;
+        }
+
+        // create a new list to avoid modification
+        // in the original list
+        List<Integer> sortedlist = new ArrayList<>(list);
+
+        // sort list in natural order
+        Collections.sort(sortedlist);
+
+        // first element in the sorted list
+        // would be minimum
+        return sortedlist.get(0);
+    }
+
+    private static int getMinForCraftings(ItemStack result, List<ItemStack> items, int[] invMatrix){
+        List<Integer> cuantosPuedoCraftear = new ArrayList<>();
+        for(int i = 0; i < invMatrix.length; i++){
+            ItemStack ingredient = items.get(i);
+            if(ingredient == null) continue;
+            ItemStack ingredientOfResult = getItemOfIngredient(result, ingredient, i);
+            if(ingredientOfResult == null) continue;
+            int costeDeCrafteo = ingredientOfResult.getAmount();
+            int cuantosPuedoCraftearPorEsteItem = (int) Math.floor( (double) ingredient.getAmount() / costeDeCrafteo );
+            cuantosPuedoCraftear.add(cuantosPuedoCraftearPorEsteItem);
+        }
+        return findMin(cuantosPuedoCraftear);
+    }
+
     public static void removeCustomItemWithShiftClick(CraftingInventory inv, Player target){
         ItemStack result = inv.getResult();
         if(result == null) return;
@@ -58,7 +94,8 @@ public class CraftingUtils {
         inv.setResult(null); // Para que no se cree el item en el inventario
         List<ItemStack> items = cacheItems(inv);
         int[] invMatrixCopy = new int[inv.getMatrix().length];
-        int cuantosPuedoCraftear = 0;
+        int cuantosPuedoCraftear = getMinForCraftings(result, items, invMatrixCopy);
+        broadcast("Cuantos puedo craftear como minimo: " + cuantosPuedoCraftear);
         for(int i = 0; i < invMatrixCopy.length; i++) {
             ItemStack copy = items.get(i);
             if(copy == null) continue;
@@ -68,9 +105,6 @@ public class CraftingUtils {
             broadcast("Item to ingredient: " + item.getType() + " Amount: " + item.getAmount());
             int costeDeCrafteo = item.getAmount();
             broadcast("Coste de crafteo: " + costeDeCrafteo);
-            // Cantidad de items que puedo craftear, multiplicado por la cantidad que da el resultado
-            cuantosPuedoCraftear = (int) Math.floor( (double) copy.getAmount() / item.getAmount() ) * result.getAmount();
-            broadcast("Cuantos puedo craftear: " + cuantosPuedoCraftear);
             int cuantosPuedoAgregar = getAmountForAddItem(target, result);
             broadcast("Cuantos puedo agregar: " + cuantosPuedoAgregar);
 
@@ -99,7 +133,7 @@ public class CraftingUtils {
                 inv.getMatrix()[i].setAmount(copy.getAmount() - remove);
         }
         ItemStack addItem = result.clone();
-        addItem.setAmount(cuantosPuedoCraftear);
+        addItem.setAmount(cuantosPuedoCraftear * result.getAmount());
         broadcast("Adding item: " + addItem.getType() + " Amount: " + addItem.getAmount());
         target.getInventory().addItem(addItem);
     }
@@ -228,11 +262,9 @@ public class CraftingUtils {
         // restando la cantidad de items que ya tiene
         for(ItemStack item : getInventoryContentNoArmorAndOffHand(target)){
             if(item == null){
-                broadcast("Adding 64 items for air");
                 amount += 64;
             }
             else if(isSameItemStack(item, itemForAdd)){
-                broadcast("Adding " + (64 - item.getAmount()) + " items for " + item);
                 amount += 64 - item.getAmount();
             }
         }
