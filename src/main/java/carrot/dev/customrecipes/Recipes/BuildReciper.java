@@ -16,22 +16,58 @@ import static carrot.dev.customrecipes.Main.console;
 
 public class BuildReciper {
     protected ShapedRecipe recipe;
-    protected boolean haveAmount = false;
+    protected boolean haveAmount;
     public static HashMap<ItemStack, HashMap<ItemStack, List<Integer>>> ingredientsWithAmount = new HashMap<>();
+    public static List<ItemStack> ingredientesConMasCantidad = new ArrayList<>();
 
     //Temp hashmap
     protected HashMap<ItemStack, List<Integer>> materialesParaIngrediente;
 
-    public BuildReciper(String id, ItemStack item) {
-        this.materialesParaIngrediente = new HashMap<>();
+    public BuildReciper(String id, ItemStack item, boolean useMoreAmount) {
+        this.haveAmount = useMoreAmount;
+
+        // Si se usa mas cantidad, se crea un hashmap para guardar los materiales
+        // y se crea una lista para explorar los items mas rapido.
+
+        if(this.haveAmount){
+            this.materialesParaIngrediente = new HashMap<>();
+            ingredientesConMasCantidad.add(item);
+        }
+
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
-        console("Registering recipe: " + this.recipe.getKey().getKey());
+        console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
     }
 
-    public BuildReciper(String id, ItemStack item, int amount){
-        this.materialesParaIngrediente = new HashMap<>();
+    public BuildReciper(String id, ItemStack item, int amount, boolean useMoreAmount){
+        this.haveAmount = useMoreAmount;
+
+        // Si se usa mas cantidad, se crea un hashmap para guardar los materiales
+        // y se crea una lista para explorar los items mas rapido.
+
+        if(this.haveAmount){
+            this.materialesParaIngrediente = new HashMap<>();
+            ingredientesConMasCantidad.add(item);
+        }
+
         if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot
         item.setAmount(amount);
+        this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
+        console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
+    }
+
+    public BuildReciper(String id, Material material, int amount, boolean useMoreAmount){
+        this.haveAmount = useMoreAmount;
+
+        // Si se usa mas cantidad, se crea un hashmap para guardar los materiales
+        // y se crea una lista para explorar los items mas rapido.
+
+        if(this.haveAmount){
+            this.materialesParaIngrediente = new HashMap<>();
+            ingredientesConMasCantidad.add(new ItemStack(material, amount));
+        }
+
+        if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot
+        ItemStack item = new ItemStack(material, amount);
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
         console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
     }
@@ -57,12 +93,23 @@ public class BuildReciper {
     }
 
     public BuildReciper setIngredient(char key, ItemStack item) {
+
+        if(this.haveAmount){
+            this.setIngredient(key, item, 1);
+            return this;
+        }
+
         this.recipe.setIngredient(key, item);
         return this;
     }
 
     public BuildReciper setIngredient(char key, ItemStack item, int amount) {
-        this.haveAmount = true;
+
+        if(!this.haveAmount){
+            this.setIngredient(key, item);
+            return this;
+        }
+
         item.setAmount(amount);
         this.recipe.setIngredient(key, item);
         //get key in the shape
@@ -85,7 +132,13 @@ public class BuildReciper {
     }
 
     public BuildReciper setIngredient(char key, Material material) {
-        this.recipe.setIngredient(key, material);
+
+        if(this.haveAmount){
+            this.setIngredient(key, new ItemStack(material), 1);
+            return this;
+        }
+
+        this.recipe.setIngredient(key, new ItemStack(material));
         return this;
     }
 

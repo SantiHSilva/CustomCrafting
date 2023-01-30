@@ -36,7 +36,7 @@ public class registerRecipes {
     }
 
     private static void registerCustomDiamond(){
-        new BuildReciper("cursed_diamond", diamondCustom(), 64)
+        new BuildReciper("cursed_diamond", diamondCustom(), 64, false)
                 .setShape(
                         "DDD",
                         "",
@@ -47,7 +47,7 @@ public class registerRecipes {
     }
 
     private static void registerAnother(){
-        new BuildReciper("cursed2", diamondCustom2(), 1)
+        new BuildReciper("cursed2", diamondCustom2(), 1, true)
                 .setShape(
                         "DDD",
                         "DDD",
@@ -58,7 +58,7 @@ public class registerRecipes {
     }
 
     private static void registerFINALFINAL(){
-        new BuildReciper("FINAL", new ItemBuilder(Material.NETHERITE_SWORD).build(), 2)
+        new BuildReciper("FINAL", Material.NETHERITE_SWORD, 2, true)
                 .setShape(
                         "2D2",
                         " D ",
