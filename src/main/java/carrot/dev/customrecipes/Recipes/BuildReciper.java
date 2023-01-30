@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static carrot.dev.customrecipes.Main.broadcast;
-import static carrot.dev.customrecipes.Main.console;
+import static carrot.dev.customrecipes.CraftingUtils.broadcast;
 
 public class BuildReciper {
     protected ShapedRecipe recipe;
@@ -35,7 +34,7 @@ public class BuildReciper {
         }
 
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
-        console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
+        broadcast("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
     }
 
     public BuildReciper(String id, ItemStack item, int amount, boolean useMoreAmount){
@@ -52,7 +51,7 @@ public class BuildReciper {
         if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot
         item.setAmount(amount);
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
-        console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
+        broadcast("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
     }
 
     public BuildReciper(String id, Material material, int amount, boolean useMoreAmount){
@@ -69,7 +68,7 @@ public class BuildReciper {
         if(amount > 64) amount = 64; // No se puede poner mas de 64 items en un slot
         ItemStack item = new ItemStack(material, amount);
         this.recipe = new ShapedRecipe(new NamespacedKey(Main.getInstance(), id), item);
-        console("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
+        broadcast("REGISTRANDO CRAFTEO: " + this.recipe.getKey().getKey());
     }
 
     private static String check(String shape){
@@ -113,9 +112,9 @@ public class BuildReciper {
         item.setAmount(amount);
         this.recipe.setIngredient(key, item);
         //get key in the shape
-        console("--------------------");
-        console("Registrando con la key: " + key + " el item: " + item + " con la cantidad: " + amount);
-        console("shape: " + Arrays.toString(this.recipe.getShape()));
+        broadcast("--------------------");
+        broadcast("Registrando con la key: " + key + " el item: " + item + " con la cantidad: " + amount);
+        broadcast("shape: " + Arrays.toString(this.recipe.getShape()));
         // Obtener el slot en el que se encuentra el ingrediente
         List<Integer> cacheSlots = new ArrayList<>();
         for (int i = 0; i < this.recipe.getShape().length; i++) {
@@ -142,9 +141,9 @@ public class BuildReciper {
         itemStack.setAmount(amount);
         this.recipe.setIngredient(key, itemStack);
         //get key in the shape
-        console("--------------------");
-        console("Registrando con la key: " + key + " el item: " + item + " con la cantidad: " + amount);
-        console("shape: " + Arrays.toString(this.recipe.getShape()));
+        broadcast("--------------------");
+        broadcast("Registrando con la key: " + key + " el item: " + item + " con la cantidad: " + amount);
+        broadcast("shape: " + Arrays.toString(this.recipe.getShape()));
         // Obtener el slot en el que se encuentra el ingrediente
         List<Integer> cacheSlots = new ArrayList<>();
         for (int i = 0; i < this.recipe.getShape().length; i++) {
@@ -177,7 +176,7 @@ public class BuildReciper {
         // Add recipe to hashmap
         if(this.haveAmount){
             ingredientsWithAmount.put(this.recipe.getResult(), this.materialesParaIngrediente);
-            console("hashmap: " + ingredientsWithAmount);
+            broadcast("hashmap: " + ingredientsWithAmount);
         }
     }
 
