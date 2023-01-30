@@ -9,6 +9,7 @@ public class registerRecipes {
         registerCustomDiamond();
         registerAnother();
         registerFINALFINAL();
+        redstone();
     }
 
     private static ItemStack diamondCustom(){
@@ -36,7 +37,7 @@ public class registerRecipes {
     }
 
     private static void registerCustomDiamond(){
-        new BuildReciper("cursed_diamond", diamondCustom(), 64, false)
+        new BuildReciper("cursed_diamond", diamondCustom(), 1, false)
                 .setShape(
                         "DDD",
                         "",
@@ -67,6 +68,17 @@ public class registerRecipes {
                 .setIngredient('S', new ItemStack(Material.STICK), 64)
                 .setIngredient('D', diamondCustom(), 16)
                 .setIngredient('2', diamondCustom2(), 32)
+                .register();
+    }
+
+    private static void redstone(){
+        new BuildReciper("redd", Material.DIAMOND, 1, true)
+                .setShape(
+                        "R",
+                        "",
+                        ""
+                )
+                .setIngredient('R', Material.REDSTONE, 10)
                 .register();
     }
 

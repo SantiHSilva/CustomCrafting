@@ -26,17 +26,127 @@ public class CraftingEvent implements Listener {
             removeCustomItemsNoShiftClick(e.getInventory());
     }
 
-    public static List<ItemStack> cacheItems(CraftingInventory inv){
+    private static List<ItemStack> cacheItems(CraftingInventory inv){
         return new ArrayList<>(Arrays.asList(inv.getMatrix()));
+    }
+
+    private static boolean isSameItemStack(ItemStack item1, ItemStack item2){
+        ItemStack copy1 = item1.clone();
+        ItemStack copy2 = item2.clone();
+        copy1.setAmount(1);
+        copy2.setAmount(1);
+        //broadcast("is equals?: " + copy1.equals(copy2));
+        return copy1.equals(copy2);
+    }
+
+    private static boolean isItemNotStackable16(ItemStack item){
+        return item.getMaxStackSize() == 16;
+    }
+
+    private static boolean isNotStackable(ItemStack item){
+        return item.getMaxStackSize() == 1;
+    }
+
+    private static List<ItemStack> getInventoryContentNoArmorAndOffHand(Player target){
+        List<ItemStack> items = new ArrayList<>(Arrays.asList(target.getInventory().getContents()));
+        //remove armor slots and offhand slot 36-41
+        //remover los ultimos 5
+        for(int i = 0; i < 5; i++){
+            items.remove(items.size() - 1);
+        }
+        return items;
+    }
+
+    private static int getAmountForAddItem(Player target, ItemStack itemForAdd){
+        int amount = 0;
+        if(isNotStackable(itemForAdd)){
+            // Si el item no es stackeable, solo buscara
+            // los items de aire en el inventario
+            for(ItemStack item : getInventoryContentNoArmorAndOffHand(target)){
+                if(item == null) amount++;
+            }
+            return amount;
+        }
+        if(isItemNotStackable16(itemForAdd)){
+            // Si el item es stackeable de 16, solo buscara
+            // los items de aire en el inventario y los items
+            // que coincidan con el item que se va a agregar
+            // restando la cantidad de items que ya tiene
+            for(ItemStack item : getInventoryContentNoArmorAndOffHand(target)){
+                if(item == null) amount += 16;
+                else if(isSameItemStack(item, itemForAdd)) amount += 16 - item.getAmount();
+            }
+            return amount;
+        }
+        // Si el item es stackeable de 64, solo buscara
+        // los items de aire en el inventario y los items
+        // que coincidan con el item que se va a agregar
+        // restando la cantidad de items que ya tiene
+        for(ItemStack item : getInventoryContentNoArmorAndOffHand(target)){
+            if(item == null){
+                broadcast("Adding 64 items for air");
+                amount += 64;
+            }
+            else if(isSameItemStack(item, itemForAdd)){
+                broadcast("Adding " + (64 - item.getAmount()) + " items for " + item);
+                amount += 64 - item.getAmount();
+            }
+        }
+        return amount;
     }
 
     private static void removeCustomItemWithShiftClick(CraftingInventory inv, Player target){
         ItemStack result = inv.getResult();
         if(result == null) return;
-        if(isResultItemInHashMap(result)){
-            target.sendMessage("No puedes hacer shift click");
-            return;
+        if(!isResultItemInHashMap(result)) return;
+        broadcast("Removing items with shift click...");
+        broadcast("result: " + result);
+        inv.setResult(null); // Para que no se cree el item en el inventario
+        List<ItemStack> items = cacheItems(inv);
+        int[] invMatrixCopy = new int[inv.getMatrix().length];
+        int cuantosPuedoCraftear = 0;
+        for(int i = 0; i < invMatrixCopy.length; i++) {
+            ItemStack copy = items.get(i);
+            if(copy == null) continue;
+            broadcast("Item: " + copy.getType() + " Amount: " + copy.getAmount());
+            ItemStack item = getItemOfIngredient(result, copy, i);
+            if(item == null) continue;
+            broadcast("Item to ingredient: " + item.getType() + " Amount: " + item.getAmount());
+            int costeDeCrafteo = item.getAmount();
+            broadcast("Coste de crafteo: " + costeDeCrafteo);
+            cuantosPuedoCraftear = (int) Math.floor( (double) copy.getAmount() / item.getAmount() );
+            broadcast("Cuantos puedo craftear: " + cuantosPuedoCraftear);
+            int cuantosPuedoAgregar = getAmountForAddItem(target, result);
+            broadcast("Cuantos puedo agregar: " + cuantosPuedoAgregar);
+
+            if(cuantosPuedoAgregar == 0){
+                // Si no tengo espacio para agregar el item
+                // no se craftea nada
+                target.sendMessage("No tienes espacio suficiente para agregar el item haciendo shitclick");
+                inv.setResult(result);
+                return;
+            }
+
+            if(cuantosPuedoAgregar < cuantosPuedoCraftear){
+                // Si la cantidad de items que puedo agregar
+                // es menor al que puedo craftear, no se
+                broadcast("No tengo espacio suficiente");
+                cuantosPuedoCraftear = cuantosPuedoAgregar;
+            }
+
+            int remove = cuantosPuedoCraftear * costeDeCrafteo;
+            broadcast("Coste total: " + remove);
+
+            broadcast("Remove: " + remove);
+            if (remove <= 0)
+                inv.setItem(i, null);
+            else
+                inv.getMatrix()[i].setAmount(copy.getAmount() - remove);
         }
+        ItemStack addItem = result.clone();
+        addItem.setAmount(cuantosPuedoCraftear);
+        broadcast("Adding item: " + addItem.getType() + " Amount: " + addItem.getAmount());
+        target.getInventory().addItem(addItem);
     }
 
     private static void removeCustomItemsNoShiftClick(CraftingInventory inv){
@@ -81,15 +191,6 @@ public class CraftingEvent implements Listener {
             }
         }
         return null;
-    }
-
-    private static boolean isSameItemStack(ItemStack item1, ItemStack item2){
-        ItemStack copy1 = item1.clone();
-        ItemStack copy2 = item2.clone();
-        copy1.setAmount(1);
-        copy2.setAmount(1);
-        //broadcast("is equals?: " + copy1.equals(copy2));
-        return copy1.equals(copy2);
     }
 
     private static Integer getAmountOfIngredient(ItemStack result, ItemStack ingredient, int slot){

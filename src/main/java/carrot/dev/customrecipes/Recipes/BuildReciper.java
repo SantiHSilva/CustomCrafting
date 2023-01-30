@@ -131,6 +131,35 @@ public class BuildReciper {
         return this;
     }
 
+    public BuildReciper setIngredient(char key, Material item, int amount) {
+
+        if(!this.haveAmount){
+            this.setIngredient(key, item);
+            return this;
+        }
+
+        ItemStack itemStack = new ItemStack(item, amount);
+        itemStack.setAmount(amount);
+        this.recipe.setIngredient(key, itemStack);
+        //get key in the shape
+        console("--------------------");
+        console("Registrando con la key: " + key + " el item: " + item + " con la cantidad: " + amount);
+        console("shape: " + Arrays.toString(this.recipe.getShape()));
+        // Obtener el slot en el que se encuentra el ingrediente
+        List<Integer> cacheSlots = new ArrayList<>();
+        for (int i = 0; i < this.recipe.getShape().length; i++) {
+            String shape = this.recipe.getShape()[i];
+            for (int j = 0; j < shape.length(); j++) {
+                if (shape.charAt(j) == key) {
+                    cacheSlots.add(i * 3 + j);
+                }
+            }
+        }
+        broadcast("Slots: " + cacheSlots);
+        materialesParaIngrediente.put(itemStack, cacheSlots);
+        return this;
+    }
+
     public BuildReciper setIngredient(char key, Material material) {
 
         if(this.haveAmount){
